@@ -1,0 +1,853 @@
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gochi+Hand&family=Pixelify+Sans:wght@500;700&display=swap');
+
+/* =========================================================
+   Tokens (colors pulled from the landing_bg collage)
+   ========================================================= */
+:root {
+  --red: #c32f35;
+  --cream: #fdeec8;
+  --orange: #f28a2e;
+  --lime: #c4de32;
+  --pink: #ee5d97;
+  --blue: #3f87d8;
+  --gold: #f6c437;
+  --ink: #2a1410;
+  --star: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* undo the default Vite #root box so the landing can be full-bleed */
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  text-align: left;
+}
+
+/* =========================================================
+   Stage + background poster
+   ========================================================= */
+.stage {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 55% 50%;
+  transition: filter 0.7s ease, transform 0.7s ease;
+}
+
+.wallpaper-toggle {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-out;
+}
+.wallpaper-toggle[aria-pressed='true'] { cursor: zoom-in; }
+.wallpaper-toggle:focus-visible { outline: 4px dashed var(--gold); outline-offset: -8px; }
+
+/* poster softens while the window is up, then sharpens when it closes */
+.stage.is-open .bg {
+  filter: blur(3px) brightness(0.92);
+  transform: scale(1.04);
+}
+.stage.wallpaper-only .bg {
+  filter: none;
+  transform: scale(1.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg { transition: none; }
+}
+
+/* =========================================================
+   Window
+   ========================================================= */
+.window {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 760px);
+  padding: 14px;
+  border-radius: 26px;
+  background: var(--red);
+  box-shadow: 10px 10px 0 var(--ink);
+  font-family: 'Gaegu', 'Comic Sans MS', cursive;
+}
+
+.window.is-open {
+  animation: window-in 0.85s var(--bounce) both;
+}
+
+.window.is-closed {
+  animation: window-out 0.45s ease-in forwards;
+}
+
+@keyframes window-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-6deg) translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-1deg) translateY(0);
+  }
+}
+
+@keyframes window-out {
+  from {
+    opacity: 1;
+    transform: scale(1) rotate(-1deg);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.5) rotate(9deg) translateY(50px);
+    visibility: hidden;
+  }
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+}
+
+.window-title {
+  margin-left: auto;
+  color: #785d4f;
+  font: 700 0.9rem/1 'Pixelify Sans', monospace;
+  letter-spacing: 0.04em;
+}
+
+.dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+}
+.dot-green {
+  background: var(--lime);
+}
+.dot-yellow {
+  background: var(--gold);
+}
+.dot-red {
+  background: var(--red);
+  cursor: pointer;
+  color: #fff;
+  font: 700 13px/1 'Pixelify Sans', monospace;
+  transition: transform 0.2s var(--bounce);
+}
+/* bigger invisible hit area for touch */
+.dot-red::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+}
+.dot-red:hover {
+  transform: scale(1.35);
+}
+.dot-red:hover::after {
+  content: '×';
+}
+.dot-red:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   Sky + pixel clouds
+   ========================================================= */
+.sky {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: clamp(360px, 46vw, 430px);
+  background: linear-gradient(#6db3ee, #a9d3f6);
+}
+
+.clouds {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* one cloud = a 10px square drawn many times with box-shadow */
+.cloud {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  box-shadow:
+    30px 0 #fff, 40px 0 #fff, 50px 0 #fff,
+    10px 10px #fff, 20px 10px #fff, 30px 10px #fff, 40px 10px #fff,
+    50px 10px #fff, 60px 10px #fff, 70px 10px #fff,
+    0 20px #fff, 10px 20px #fff, 20px 20px #fff, 30px 20px #fff, 40px 20px #fff,
+    50px 20px #fff, 60px 20px #fff, 70px 20px #fff, 80px 20px #fff;
+  animation: drift 14s ease-in-out infinite alternate;
+}
+.cloud-a {
+  top: 8%;
+  left: 8%;
+  scale: 1.4;
+}
+.cloud-b {
+  top: 12%;
+  right: 12%;
+  scale: 1.9;
+  opacity: 0.85;
+  animation-duration: 19s;
+  animation-direction: alternate-reverse;
+}
+.cloud-c {
+  bottom: 10%;
+  left: 32%;
+  scale: 1.1;
+  opacity: 0.8;
+  animation-duration: 16s;
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(-26px);
+  }
+  to {
+    transform: translateX(26px);
+  }
+}
+
+/* =========================================================
+   Banner + title
+   ========================================================= */
+.banner {
+  position: relative;
+  z-index: 1;
+  width: 112%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 3vw, 36px);
+  padding: clamp(18px, 3.5vw, 30px) 0;
+  border-block: 5px solid var(--red);
+  background:
+    linear-gradient(var(--red), var(--red)) 0 12px / 100% 3px no-repeat,
+    linear-gradient(var(--red), var(--red)) 0 calc(100% - 12px) / 100% 3px no-repeat,
+    var(--cream);
+}
+
+.landing-note {
+  position: absolute;
+  z-index: 2;
+  bottom: 18px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: min(78%, 450px);
+  min-height: 76px;
+  padding: 10px 17px;
+  border: 2px solid var(--ink);
+  border-radius: 5px 20px 5px 16px;
+  background: var(--cream);
+  box-shadow: 5px 5px 0 var(--ink);
+  color: var(--ink);
+  transform: translateX(-50%) rotate(-1deg);
+  animation: note-in 0.7s var(--bounce) 0.45s backwards;
+  transition: transform 0.25s var(--bounce), box-shadow 0.25s;
+}
+
+.landing-note:hover {
+  box-shadow: 7px 8px 0 var(--ink);
+  transform: translate(-50%, -4px) rotate(0);
+}
+
+.landing-note-pin {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 46px;
+  aspect-ratio: 1;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--red);
+  color: white;
+  font: 700 0.9rem/1 'Pixelify Sans', monospace;
+  transform: rotate(-8deg);
+}
+
+.landing-note-copy {
+  display: grid;
+  min-width: 0;
+  line-height: 1;
+}
+
+.landing-note-kicker {
+  color: var(--red);
+  font: 700 0.72rem/1.1 'Pixelify Sans', monospace;
+  letter-spacing: 0.1em;
+}
+
+.landing-note-copy strong {
+  overflow: hidden;
+  font: 400 clamp(1.2rem, 2.8vw, 1.7rem)/1.08 'Gochi Hand', cursive;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing-note-role {
+  margin-top: 4px;
+  color: #694b3d;
+  font-size: 1.05rem;
+  line-height: 1.1;
+}
+
+.landing-note-doodle {
+  margin-left: auto;
+  color: var(--orange);
+  font-size: 2rem;
+  animation: doodle-turn 8s linear infinite;
+}
+
+.sky-caption {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  z-index: 1;
+  color: #284f70;
+  font: 700 0.68rem/1 'Pixelify Sans', monospace;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 24px) rotate(-4deg) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) rotate(-1deg) scale(1);
+  }
+}
+
+@keyframes doodle-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cats {
+  display: flex;
+  gap: clamp(6px, 2vw, 22px);
+}
+
+.cat {
+  flex: none;
+  width: clamp(26px, 6.5vw, 56px);
+  height: auto;
+  fill: var(--red);
+}
+.cat-sm {
+  width: 30px;
+}
+.cats .cat:nth-child(odd) {
+  animation: hop 2.4s ease-in-out infinite;
+}
+.cats .cat:nth-child(even) {
+  animation: hop 2.4s ease-in-out 1.2s infinite;
+}
+
+@keyframes hop {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+  }
+  80% {
+    transform: translateY(-8px);
+  }
+  90% {
+    transform: translateY(0);
+  }
+}
+
+.title {
+  margin: 0;
+}
+
+.title-btn {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: default;
+}
+.title-btn:focus-visible {
+  outline: 3px dashed var(--blue);
+  outline-offset: 8px;
+}
+
+.word {
+  display: block;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: clamp(3.4rem, 13vw, 7.2rem);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.letter {
+  display: inline-block;
+  cursor: pointer;
+  text-shadow: 3px 3px 0 rgba(42, 20, 16, 0.85);
+  transition: color 0.25s;
+  /* drop in one by one, then bob like a little wave */
+  animation:
+    letter-in 0.75s var(--bounce) calc(0.5s + var(--i) * 0.08s) both,
+    bob 3.2s ease-in-out calc(1.6s + var(--i) * 0.15s) infinite;
+}
+
+.glyph {
+  display: inline-block;
+  transition: transform 0.2s var(--bounce);
+}
+.letter:hover .glyph {
+  transform: scale(1.15) rotate(-5deg);
+}
+.glyph.is-pop {
+  animation: pop 0.6s var(--bounce);
+}
+
+@keyframes letter-in {
+  from {
+    opacity: 0;
+    transform: translateY(-130%) rotate(-25deg) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(1.5deg);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: translateY(-26px) rotate(-12deg) scale(1.3);
+  }
+  60% {
+    transform: translateY(4px) rotate(6deg) scale(0.92);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* =========================================================
+   Ticker
+   ========================================================= */
+.ticker {
+  overflow: hidden;
+  padding: 8px 0;
+  background: var(--cream);
+  border-radius: 0 0 16px 16px;
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 16s linear infinite;
+}
+
+.ticker-group {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding-right: 22px;
+}
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  color: var(--red);
+  font: 700 1.5rem/1 'Pixelify Sans', monospace;
+  letter-spacing: 0.04em;
+}
+
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* =========================================================
+   Glitter stars around the window
+   ========================================================= */
+.star {
+  position: absolute;
+  z-index: 4;
+  width: clamp(34px, 6vw, 64px);
+  aspect-ratio: 1;
+  clip-path: var(--star);
+  background:
+    radial-gradient(circle at 30% 32%, rgba(255, 255, 255, 0.9) 0 7%, transparent 8%),
+    radial-gradient(circle at 68% 60%, rgba(255, 255, 255, 0.7) 0 5%, transparent 6%),
+    var(--c, var(--gold));
+  animation: twinkle 2.6s ease-in-out infinite;
+}
+.star-a {
+  top: -26px;
+  left: -22px;
+  width: clamp(44px, 8vw, 80px);
+}
+.star-b {
+  --c: #d93c2f;
+  top: 22%;
+  right: -24px;
+  animation-delay: 0.7s;
+}
+.star-c {
+  --c: var(--blue);
+  bottom: -22px;
+  left: 14%;
+  animation-delay: 1.3s;
+}
+.star-d {
+  bottom: 18%;
+  right: -30px;
+  width: clamp(26px, 4vw, 44px);
+  animation-delay: 0.3s;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    transform: scale(0.88) rotate(-6deg);
+  }
+  50% {
+    transform: scale(1.12) rotate(8deg);
+  }
+}
+
+/* =========================================================
+   Hint tag
+   ========================================================= */
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: -52px;
+  margin: 0;
+  padding: 2px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--cream);
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+  font-size: 1.2rem;
+  white-space: nowrap;
+  transform: translateX(-50%) rotate(-2deg);
+}
+
+/* =========================================================
+   Dock of desktop icons (shows when the intro window is closed)
+   ========================================================= */
+.dock {
+  position: fixed;
+  left: 58%; /* sits on the quiet part of the poster, clear of the lettering */
+  bottom: clamp(20px, 7vh, 60px);
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 24px) scale(0.6);
+  transition: opacity 0.2s, transform 0.2s, visibility 0s 0.2s;
+}
+
+.stage.is-closed .dock {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0) scale(1);
+  transition:
+    opacity 0.4s 0.35s,
+    transform 0.55s var(--bounce) 0.35s,
+    visibility 0s 0.35s;
+}
+
+.reopen {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* second folder is tinted blue so the two icons are easy to tell apart */
+.reopen-projects .reopen-icon {
+  filter: hue-rotate(150deg) drop-shadow(4px 4px 0 var(--ink));
+}
+
+@media (max-width: 700px) {
+  .dock {
+    left: 50%;
+  }
+}
+
+.reopen-icon {
+  width: 84px;
+  filter: drop-shadow(4px 4px 0 var(--ink));
+  animation: wobble 2.4s ease-in-out infinite;
+}
+.reopen:hover .reopen-icon {
+  animation-duration: 0.6s;
+}
+
+.reopen-label {
+  padding: 2px 12px;
+  border: 2px solid var(--red);
+  border-radius: 6px;
+  background: var(--cream);
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--red);
+  font: 700 1rem/1.4 'Pixelify Sans', monospace;
+}
+
+.reopen:focus-visible {
+  outline: 3px dashed var(--blue);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg) translateY(-4px);
+  }
+}
+
+/* =========================================================
+   Click sparks
+   ========================================================= */
+.sparks {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.spark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  clip-path: var(--star);
+  background:
+    radial-gradient(circle at 32% 32%, rgba(255, 255, 255, 0.9) 0 8%, transparent 9%),
+    var(--c);
+  animation: spark 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes spark {
+  from {
+    opacity: 1;
+    transform: translate(var(--x), var(--y)) scale(0.2) rotate(0deg);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(calc(var(--x) + var(--dx) * 0.5), calc(var(--y) + var(--dy) * 0.5))
+      scale(1.1) rotate(calc(var(--rot) * 0.5));
+  }
+  to {
+    opacity: 0;
+    transform: translate(calc(var(--x) + var(--dx)), calc(var(--y) + var(--dy))) scale(0.3)
+      rotate(var(--rot));
+  }
+}
+
+/* =========================================================
+   Small screens + reduced motion
+   ========================================================= */
+@media (max-width: 480px) {
+  .hint {
+    font-size: 1.05rem;
+    bottom: -48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window.is-open,
+  .letter,
+  .cloud,
+  .star,
+  .cat,
+  .landing-note,
+  .landing-note-doodle,
+  .ticker-track,
+  .reopen-icon {
+    animation: none;
+  }
+  .window.is-closed {
+    animation-duration: 1ms;
+  }
+  .spark {
+    animation-duration: 1ms;
+  }
+  .bg,
+  .stage.is-closed .dock {
+    transition: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .stage {
+    padding: 20px 12px 78px;
+  }
+
+  .window {
+    width: min(100%, 620px);
+    padding: 10px;
+    border-radius: 21px;
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+
+  .sky {
+    height: clamp(300px, 78vw, 350px);
+  }
+
+  .banner {
+    width: 108%;
+    gap: clamp(5px, 2vw, 20px);
+    transform: translateY(-40px);
+  }
+
+  .landing-note {
+    bottom: 12px;
+    width: min(88%, 450px);
+    min-height: 68px;
+    gap: 9px;
+    padding: 8px 12px;
+  }
+
+  .landing-note-pin {
+    width: 38px;
+  }
+
+  .landing-note-role {
+    font-size: 0.95rem;
+  }
+
+  .landing-note-doodle {
+    font-size: 1.6rem;
+  }
+
+  .sky-caption {
+    top: 11px;
+    font-size: 0.56rem;
+    letter-spacing: 0.04em;
+  }
+
+  .word {
+    font-size: clamp(2.6rem, 14vw, 6rem);
+  }
+
+  .cat {
+    width: clamp(18px, 5.5vw, 42px);
+  }
+
+  .ticker-item {
+    font-size: 1.1rem;
+  }
+
+  .cat-sm {
+    width: 24px;
+  }
+
+  .enter {
+    bottom: -68px;
+    padding: 7px 19px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .titlebar {
+    height: 38px;
+    padding-inline: 11px;
+  }
+
+  .window-title {
+    font-size: 0.75rem;
+  }
+
+  .dot {
+    width: 13px;
+    height: 13px;
+  }
+
+  .banner {
+    border-block-width: 4px;
+  }
+
+  .word {
+    font-size: clamp(2.4rem, 13.2vw, 3.2rem);
+  }
+
+  .landing-note-copy strong {
+    font-size: 1.15rem;
+  }
+
+  .landing-note-role {
+    font-size: 0.88rem;
+  }
+}
